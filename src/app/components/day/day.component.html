@@ -1,0 +1,6 @@
+<div class="day">
+  <h3>{{ day.day }}</h3>
+  <div *ngFor="let lesson of day.lessons">
+    <app-lesson [lesson]="lesson" (onEdit)="editLesson(day.day, lesson)"></app-lesson>
+  </div>
+</div>

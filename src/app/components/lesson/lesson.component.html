@@ -1,0 +1,10 @@
+<div class="lesson">
+  <h4>{{ lesson.subject }}</h4>
+  <p>Nauczyciel: {{ lesson.teacher }}</p>
+  <p>Sala: {{ lesson.classroom }}</p>
+  <p>Czas: {{ lesson.startTime | date:'shortTime' }} - {{ lesson.endTime | date:'shortTime' }}</p>
+
+  <!-- Przycisk do edytowania lekcji -->
+  <button (click)="editLesson()">Edytuj</button>
+  <button (click)="deleteLesson()">Usuń</button>
+</div>
