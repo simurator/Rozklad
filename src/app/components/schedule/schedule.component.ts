@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ScheduleService } from '../../services/schedule.service';
 import { Lesson } from '../../models/lesson.model';
 import { Day } from '../../models/day.model';
@@ -10,11 +10,13 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './schedule.component.html',
   styleUrls: ['./schedule.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]  // Add FormsModule to imports
+  imports: [CommonModule, FormsModule]
 })
 export class ScheduleComponent implements OnInit {
   schedule: Day[] = [];
+
   editingLesson: {
+    id: number ;
     lesson: Lesson | null;
     dayName: string;
     isEditing: boolean;
@@ -25,7 +27,9 @@ export class ScheduleComponent implements OnInit {
     startTime: Date;
     endTime: Date;
     subject: string;
+    durationMinutes?: number;
   } = {
+      id: 0,
       lesson: null,
       dayName: '',
       isEditing: false,
@@ -37,110 +41,94 @@ export class ScheduleComponent implements OnInit {
       endTime: new Date(),
       subject: '',
     };
+  public i: number = 1;
+  constructor(private scheduleService: ScheduleService, private cdr: ChangeDetectorRef) { }
 
-  constructor(private scheduleService: ScheduleService) { }
-
-  // Compare lessons to check if they're the same
-  compareLessons(lesson1: Lesson, lesson2: Lesson): boolean {
-    return lesson1.subject === lesson2.subject &&
-      lesson1.teacher === lesson2.teacher &&
-      lesson1.startTime === lesson2.startTime &&
-      lesson1.endTime === lesson2.endTime;
-  }
-
-  // Initialize schedule data
   ngOnInit(): void {
     this.schedule = this.scheduleService.getSchedule();
   }
-
-  // Add a new lesson
-  addLesson(dayName: string): void {
-    const newLesson: Lesson = {
-      subject: 'New Lesson',
-      teacher: 'New Teacher',
-      classroom: 'New Classroom',
-      startTime: new Date(),
-      endTime: new Date(),
-      day: dayName
-    };
-    this.scheduleService.addLesson(dayName, newLesson);
-  }
-
-  // Delete a lesson
   deleteLesson(dayName: string, lesson: Lesson): void {
     this.scheduleService.deleteLesson(dayName, lesson);
+    this.i = this.i + 1;
+    
+    
+
+  }
+  addLesson(dayName: string): void {
+    
+    
+    const day = this.schedule.find(d => d.dayName === dayName);
+    
+    if (day) {
+      const newLesson: Lesson = {
+        day: dayName,
+        id: this.i + day.lessons.length, // Przypisujemy inkrementalne ID
+        subject: '',
+        teacher: '',
+        classroom: '',
+        startTime: new Date(),
+        endTime: new Date(),
+        durationMinutes: 0
+      };
+
+      day.lessons.push(newLesson);
+    }
   }
 
-  // Start editing a lesson
   startEditing(dayName: string, lesson: Lesson, index: number): void {
     const day = this.schedule.find(d => d.dayName === dayName);
     if (day) {
       const lessonToEdit = day.lessons[index];
       this.editingLesson = {
-        lesson: { ...lessonToEdit }, // Copy lesson to preserve existing data
+        id: lessonToEdit.id,
+        lesson: { ...lessonToEdit },
         dayName: dayName,
         isEditing: true,
-        originalLesson: lessonToEdit,
+        originalLesson: { ...lessonToEdit },
         index: index,
-        teacher: lessonToEdit.teacher,  // Set teacher
-        classroom: lessonToEdit.classroom,  // Set classroom
-        startTime: new Date(lessonToEdit.startTime),  // Set start time
-        endTime: new Date(lessonToEdit.endTime),  // Set end time
-        subject: lessonToEdit.subject, // Ensure subject is set here
+        teacher: lessonToEdit.teacher,
+        classroom: lessonToEdit.classroom,
+        startTime: new Date(lessonToEdit.startTime),
+        endTime: new Date(lessonToEdit.endTime),
+        subject: lessonToEdit.subject,
       };
+      
     }
   }
 
-
-  // Save the edited lesson
   saveEdit(): void {
-    // Check if the lesson and index are valid
-    if (!this.editingLesson.lesson || this.editingLesson.index === null || this.editingLesson.index === undefined) {
+    if (!this.editingLesson.lesson || this.editingLesson.index === null) {
       console.error("No lesson to save.");
       return;
     }
 
-    // Log the current state for debugging purposes
-    console.log("Saving lesson:", this.editingLesson);
-
-    // Find the day object by its name
     const day = this.schedule.find(d => d.dayName === this.editingLesson.dayName);
-
     if (!day) {
       console.error("Day not found in the schedule.");
       return;
     }
 
-    // Update the lesson in the schedule using the lesson from editingLesson
-    day.lessons[this.editingLesson.index] = {
-      ...this.editingLesson.lesson,    // Spread the original lesson to retain unchanged properties
-      subject: this.editingLesson.subject, // Ensure subject is correctly set
-      teacher: this.editingLesson.teacher,  // Update teacher
-      classroom: this.editingLesson.classroom,  // Update classroom
-      startTime: this.editingLesson.startTime,  // Update start time
-      endTime: this.editingLesson.endTime   // Update end time
+    // Aktualizacja szczegółów lekcji w wybranym dniu
+    const updatedLesson = {
+      ...this.editingLesson.lesson,
+      id: this.editingLesson.id,
+      subject: this.editingLesson.subject,
+      teacher: this.editingLesson.teacher,
+      classroom: this.editingLesson.classroom,
+      startTime: this.editingLesson.startTime,
+      endTime: this.editingLesson.endTime
     };
 
-    // Log the updated lesson for debugging
-    console.log("Updated lesson:", day.lessons[this.editingLesson.index]);
+    day.lessons[this.editingLesson.index] = updatedLesson;
+    
 
-    // Reset the editing state after saving
-     // Call the cancel function to clear the editing state
+    this.resetEditingState();
+    this.cdr.detectChanges();
   }
 
-
-  // Cancel editing and reset the form
-  cancelEditing(): void {
-    if (this.editingLesson.originalLesson) {
-      // Restore the original lesson
-      const day = this.schedule.find(d => d.dayName === this.editingLesson.dayName);
-      if (day && this.editingLesson.index !== null) {
-        day.lessons[this.editingLesson.index] = this.editingLesson.originalLesson;
-      }
-    }
-
-    // Reset the state of editingLesson
+  private resetEditingState(): void {
     this.editingLesson = {
+      id: 0,
       lesson: null,
       dayName: '',
       isEditing: false,
@@ -153,4 +141,17 @@ export class ScheduleComponent implements OnInit {
       subject: '',
     };
   }
+
+  cancelEditing(): void {
+    if (this.editingLesson.originalLesson && this.editingLesson.index !== null) {
+      const day = this.schedule.find(d => d.dayName === this.editingLesson.dayName);
+      if (day) {
+        day.lessons[this.editingLesson.index] = { ...this.editingLesson.originalLesson };
+      }
+    }
+    this.resetEditingState();
+    this.cdr.detectChanges();
+  }
+
+  
 }

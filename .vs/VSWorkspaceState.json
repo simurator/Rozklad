@@ -7,8 +7,9 @@
     "\\src\\app\\components\\day",
     "\\src\\app\\components\\lesson",
     "\\src\\app\\components\\schedule",
+    "\\src\\app\\models",
     "\\src\\app\\services"
   ],
-  "SelectedNode": "\\src\\app\\services\\schedule.service.ts",
+  "SelectedNode": "\\src\\app\\components\\schedule\\schedule.component.ts",
   "PreviewInSolutionExplorer": false
 }

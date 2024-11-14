@@ -2,42 +2,45 @@
   <h2>{{ day.dayName }}</h2>
 
   <ul>
-    <li *ngFor="let lesson of day.lessons; let i = index">
-      <div *ngIf="!(editingLesson && editingLesson.lesson && compareLessons(editingLesson.lesson, lesson)); else editForm">
+    <li *ngFor="let lesson of day.lessons; let i = index;">
+      <div *ngIf="!(editingLesson && editingLesson.lesson) || editingLesson.id !== lesson.id; else editForm">
         <ul>
+          <li><strong>ID:</strong> {{ lesson.id }}</li> <!-- Wyświetlanie ID lekcji -->
           <li><strong>Subject:</strong> {{ lesson.subject }}</li>
           <li><strong>Teacher:</strong> {{ lesson.teacher }}</li>
           <li><strong>Classroom:</strong> {{ lesson.classroom }}</li>
           <li><strong>Start Time:</strong> {{ lesson.startTime | date: 'short' }}</li>
           <li><strong>End Time:</strong> {{ lesson.endTime | date: 'short' }}</li>
+          
         </ul>
-        <button (click)="deleteLesson(day.dayName, lesson)">Delete</button>
         <button (click)="startEditing(day.dayName, lesson, i)">Edit</button>
+        <button (click)="deleteLesson(day.dayName, lesson)">Delete</button>
       </div>
 
       <ng-template #editForm>
-        <form *ngIf="editingLesson && editingLesson.lesson" (ngSubmit)="saveEdit()">
+        <form *ngIf="editingLesson && editingLesson.id === lesson.id" (ngSubmit)="saveEdit()">
           <ul>
             <li>
-              <input type="text" [(ngModel)]="editingLesson.subject" name="subject" placeholder="Subject" />
+              <input type="text" [(ngModel)]="editingLesson.subject" name="subject" placeholder="Subject" required />
             </li>
             <li>
-              <input type="text" [(ngModel)]="editingLesson.teacher" name="teacher" placeholder="Teacher" />
+              <input type="text" [(ngModel)]="editingLesson.teacher" name="teacher" placeholder="Teacher" required />
             </li>
             <li>
-              <input type="text" [(ngModel)]="editingLesson.classroom" name="classroom" placeholder="Classroom" />
+              <input type="text" [(ngModel)]="editingLesson.classroom" name="classroom" placeholder="Classroom" required />
             </li>
             <li>
-              <input type="datetime-local" [(ngModel)]="editingLesson.startTime" name="startTime" />
+              <label>Start Time</label>
+              <input type="datetime-local" [(ngModel)]="editingLesson.startTime" name="startTime"  />
             </li>
             <li>
-              <input type="datetime-local" [(ngModel)]="editingLesson.endTime" name="endTime" />
+              <label>End Time</label>
+              <input type="datetime-local" [(ngModel)]="editingLesson.endTime" name="endTime"  />
             </li>
           </ul>
           <button type="submit">Save</button>
           <button type="button" (click)="cancelEditing()">Cancel</button>
         </form>
-
       </ng-template>
     </li>
   </ul>

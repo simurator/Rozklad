@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Lesson } from '../models/lesson.model';  // Import the Lesson model
 import { Day } from '../models/day.model';  // Import the Day model
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -25,12 +26,23 @@ export class ScheduleService {
 
   addLesson(dayName: string, lesson: Lesson): void {
     const day = this.schedule.find(d => d.dayName === dayName);
+
     if (day) {
+      // Upewnij się, że startTime jest typu Date
+      if (!(lesson.startTime instanceof Date)) {
+        lesson.startTime = new Date(lesson.startTime); // jeśli startTime jest np. stringiem, konwertujemy go na Date
+      }
+
+      // Dodanie nowej lekcji
       day.lessons.push(lesson);
-      // Optionally, sort by start time
-      day.lessons.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+
+      // Posortowanie lekcji i przypisanie nowej tablicy
+      day.lessons = day.lessons.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
     }
   }
+
+
+
 
   deleteLesson(dayName: string, lesson: Lesson): void {
     const day = this.schedule.find(d => d.dayName === dayName);
