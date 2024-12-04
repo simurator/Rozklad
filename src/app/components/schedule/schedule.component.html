@@ -1,8 +1,8 @@
 <div *ngFor="let day of schedule">
   <h2>{{ day.dayName }}</h2>
-  <ul>
-    <li *ngFor="let lesson of day.lessons; let lessonIndex = index">
-      <div *ngIf="!isEditing(day.dayName, lessonIndex)">
+  <div *ngFor="let lesson of day.lessons; let lessonIndex = index">
+    <ng-container *ngIf="editForms[day.dayName][lessonIndex] as lessonForm">
+      <div *ngIf="!lessonForm.get('editing')?.value">
         <ul>
           <li><strong>ID:</strong> {{ lesson.id }}</li>
           <li><strong>Subject:</strong> {{ lesson.subject }}</li>
@@ -11,37 +11,55 @@
           <li><strong>Start Time:</strong> {{ lesson.startTime | date: 'short' }}</li>
           <li><strong>End Time:</strong> {{ lesson.endTime | date: 'short' }}</li>
         </ul>
-        <button (click)="startEditing(day.dayName, lessonIndex)">Edit</button>
+        <button (click)="lessonForm.get('editing')?.setValue(true)">Edit</button>
         <button (click)="deleteLesson(day.dayName, lesson)">Delete</button>
       </div>
 
-      <form *ngIf="isEditing(day.dayName, lessonIndex)" (ngSubmit)="saveEdit(day.dayName, lessonIndex)">
-        <ul>
-          <li>
-            <input type="text" [(ngModel)]="lesson.subject" name="subject" placeholder="Subject" required />
-          </li>
-          <li>
-            <input type="text" [(ngModel)]="lesson.teacher" name="teacher" placeholder="Teacher" required />
-          </li>
-          <li>
-            <input type="text" [(ngModel)]="lesson.classroom" name="classroom" placeholder="Classroom" required />
-          </li>
-          <li>
-            <label>Start Time</label>
-            <input type="datetime-local" [(ngModel)]="lesson.startTime" name="startTime" />
-          </li>
-          <li>
-            <label>End Time</label>
-            <input type="datetime-local" [(ngModel)]="lesson.endTime" name="endTime" />
-          </li>
-          <li *ngIf="getValidationError(day.dayName, lessonIndex)" class="error">
-            {{ getValidationError(day.dayName, lessonIndex) }}
-          </li>
-        </ul>
-        <button type="submit">Save</button>
+      <form *ngIf="lessonForm.get('editing')?.value"
+            [formGroup]="lessonForm"
+            (ngSubmit)="saveEdit(day.dayName, lessonIndex)">
+        <div>
+          <label>Subject</label>
+          <input type="text" formControlName="subject" />
+          <div *ngIf="isControlInvalid(lessonForm, 'subject')" class="error">
+            {{ getErrorMessage(lessonForm, 'subject') }}
+          </div>
+        </div>
+
+        <div>
+          <label>Teacher</label>
+          <input type="text" formControlName="teacher" />
+          <div *ngIf="isControlInvalid(lessonForm, 'teacher')" class="error">
+            {{ getErrorMessage(lessonForm, 'teacher') }}
+          </div>
+        </div>
+
+        <div>
+          <label>Classroom</label>
+          <input type="text" formControlName="classroom" />
+          <div *ngIf="isControlInvalid(lessonForm, 'classroom')" class="error">
+            {{ getErrorMessage(lessonForm, 'classroom') }}
+          </div>
+        </div>
+
+        <div>
+          <label>Start Time</label>
+          <input type="datetime-local" formControlName="startTime" />
+        </div>
+
+        <div>
+          <label>End Time</label>
+          <input type="datetime-local" formControlName="endTime" />
+        </div>
+
+        <div *ngIf="lessonForm.errors?.['invalidTime']" class="error">
+          End time must be later than start time
+        </div>
+
+        <button type="submit" [disabled]="lessonForm.invalid">Save</button>
         <button type="button" (click)="cancelEditing(day.dayName, lessonIndex)">Cancel</button>
       </form>
-    </li>
-  </ul>
+    </ng-container>
+  </div>
   <button (click)="addLesson(day.dayName)">Add Lesson</button>
 </div>

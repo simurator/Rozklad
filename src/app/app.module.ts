@@ -9,6 +9,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ScheduleService } from './services/schedule.service';
 
 
+
 @NgModule({
   declarations: [
     AppComponent,          // Główny komponent aplikacji
