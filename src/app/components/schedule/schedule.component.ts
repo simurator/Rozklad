@@ -6,12 +6,11 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { lessonTimeValidator } from '../../validators/lesson-time.validator';
 
-
 @Component({
-    selector: 'app-schedule',
-    templateUrl: './schedule.component.html',
-    styleUrls: ['./schedule.component.css'],
-    imports: [CommonModule, ReactiveFormsModule]
+  selector: 'app-schedule',
+  templateUrl: './schedule.component.html',
+  styleUrls: ['./schedule.component.css'],
+  imports: [CommonModule, ReactiveFormsModule]
 })
 export class ScheduleComponent implements OnInit {
   schedule: Day[] = [];
@@ -47,7 +46,8 @@ export class ScheduleComponent implements OnInit {
       teacher: [lesson.teacher, Validators.required],
       classroom: [lesson.classroom, Validators.required],
       startTime: [lesson.startTime, Validators.required],
-      endTime: [lesson.endTime, Validators.required]
+      endTime: [lesson.endTime, Validators.required],
+      editing: [false] // Pole kontrolujące tryb edycji
     }, { validators: lessonTimeValidator() });
   }
 
@@ -68,8 +68,8 @@ export class ScheduleComponent implements OnInit {
         teacher: '',
         classroom: '',
         startTime: new Date(),
-        endTime: new Date(),
-        durationMinutes: 0
+        endTime: new Date()
+        
       };
 
       this.scheduleService.addLesson(dayName, newLesson);
@@ -84,7 +84,12 @@ export class ScheduleComponent implements OnInit {
     if (form.valid) {
       const lesson = form.value;
       this.scheduleService.updateLesson(dayName, lesson);
-      form.reset(lesson);
+
+      // Completely reset the form for this lesson
+      this.editForms[dayName][lessonIndex] = this.createLessonForm(lesson);
+
+      // Trigger change detection to update the view
+      this.cdr.detectChanges();
     } else {
       Object.keys(form.controls).forEach(key => {
         const control = form.get(key);
@@ -95,10 +100,28 @@ export class ScheduleComponent implements OnInit {
     }
   }
 
+  
+
+  enableEditing(dayName: string, lessonIndex: number): void {
+    // Disable editing for all lessons in this day
+    Object.keys(this.editForms[dayName]).forEach((index) => {
+      const form = this.editForms[dayName][Number(index)];
+      form.get('editing')?.setValue(false);
+    });
+
+    // Enable editing for the selected lesson
+    this.editForms[dayName][lessonIndex].get('editing')?.setValue(true);
+  }
+
+
+
+
   cancelEditing(dayName: string, lessonIndex: number): void {
     const originalLesson = this.schedule.find(d => d.dayName === dayName)?.lessons[lessonIndex];
     if (originalLesson) {
       this.editForms[dayName][lessonIndex] = this.createLessonForm(originalLesson);
+      this.editForms[dayName][lessonIndex].get('editing')?.setValue(false); // Wyłącz tryb edycji
+      this.cdr.markForCheck();
     }
   }
 

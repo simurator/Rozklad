@@ -6,5 +6,5 @@ export interface Lesson {
   startTime: Date;  // Czas rozpoczęcia
   endTime: Date;    // Czas zakończenia
   day: string;
-  durationMinutes?: number;
+  
 }

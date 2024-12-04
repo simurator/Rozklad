@@ -23,8 +23,8 @@ export class ScheduleService {
             teacher: 'Jan Kowalski',
             classroom: '101',
             startTime: new Date(),
-            endTime: new Date(),
-            durationMinutes: 45
+            endTime: new Date()
+           
           }
         ]
       },
@@ -94,8 +94,13 @@ export class ScheduleService {
       const lessonIndex = day.lessons.findIndex(l => l.id === updatedLesson.id);
       if (lessonIndex !== -1) {
         day.lessons[lessonIndex] = updatedLesson;
+        console.log('Updated Lesson:', updatedLesson);
         this.saveSchedule(schedule);
+      } else {
+        console.error('Lesson not found:', updatedLesson.id);
       }
+    } else {
+      console.error('Day not found:', dayName);
     }
   }
 

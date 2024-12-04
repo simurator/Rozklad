@@ -2,6 +2,7 @@
   <h2>{{ day.dayName }}</h2>
   <div *ngFor="let lesson of day.lessons; let lessonIndex = index">
     <ng-container *ngIf="editForms[day.dayName][lessonIndex] as lessonForm">
+      <!-- Detail View -->
       <div *ngIf="!lessonForm.get('editing')?.value">
         <ul>
           <li><strong>ID:</strong> {{ lesson.id }}</li>
@@ -11,10 +12,11 @@
           <li><strong>Start Time:</strong> {{ lesson.startTime | date: 'short' }}</li>
           <li><strong>End Time:</strong> {{ lesson.endTime | date: 'short' }}</li>
         </ul>
-        <button (click)="lessonForm.get('editing')?.setValue(true)">Edit</button>
+        <button (click)="enableEditing(day.dayName, lessonIndex)">Edit</button>
         <button (click)="deleteLesson(day.dayName, lesson)">Delete</button>
       </div>
 
+      <!-- Edit Form -->
       <form *ngIf="lessonForm.get('editing')?.value"
             [formGroup]="lessonForm"
             (ngSubmit)="saveEdit(day.dayName, lessonIndex)">
@@ -52,6 +54,7 @@
           <input type="datetime-local" formControlName="endTime" />
         </div>
 
+        <!-- Time Validation -->
         <div *ngIf="lessonForm.errors?.['invalidTime']" class="error">
           End time must be later than start time
         </div>
@@ -61,5 +64,7 @@
       </form>
     </ng-container>
   </div>
+
+  <!-- Add Lesson Button -->
   <button (click)="addLesson(day.dayName)">Add Lesson</button>
 </div>
