@@ -8,11 +8,10 @@ import { lessonTimeValidator } from '../../validators/lesson-time.validator';
 
 
 @Component({
-  selector: 'app-schedule',
-  templateUrl: './schedule.component.html',
-  styleUrls: ['./schedule.component.css'],
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule]
+    selector: 'app-schedule',
+    templateUrl: './schedule.component.html',
+    styleUrls: ['./schedule.component.css'],
+    imports: [CommonModule, ReactiveFormsModule]
 })
 export class ScheduleComponent implements OnInit {
   schedule: Day[] = [];

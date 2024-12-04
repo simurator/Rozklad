@@ -5,11 +5,10 @@ import { CommonModule } from '@angular/common';
 import { Lesson } from '../../models/lesson.model';
 
 @Component({
-  selector: 'app-day',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './day.component.html',
-  styleUrls: ['./day.component.css']
+    selector: 'app-day',
+    imports: [CommonModule],
+    templateUrl: './day.component.html',
+    styleUrls: ['./day.component.css']
 })
 export class DayComponent {
   @Input() day!: Day;  // Przyjmowanie obiektu dnia typu Day
